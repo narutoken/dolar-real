@@ -1,0 +1,769 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <title>Cotação Dólar Hoje | USD/BRL em Tempo Real</title>
+  <meta name="description" content="Acompanhe a cotação do dólar em relação ao real (USD/BRL) em tempo real. Gráfico histórico, variação diária e dados oficiais do Banco Central do Brasil." />
+  <meta name="keywords" content="cotação dólar, dólar hoje, USD BRL, câmbio, dólar real, cotação dólar real, banco central" />
+  <meta name="author" content="Cotação Dólar BR" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://SEU-USUARIO.github.io/dolar-real/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="Cotação Dólar Hoje | USD/BRL em Tempo Real" />
+  <meta property="og:description" content="Acompanhe a cotação do dólar em relação ao real com gráfico histórico e dados do Banco Central." />
+  <meta property="og:url"         content="https://SEU-USUARIO.github.io/dolar-real/" />
+  <meta property="og:locale"      content="pt_BR" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Cotação Dólar Hoje | USD/BRL" />
+  <meta name="twitter:description" content="Dólar em tempo real com gráfico histórico e dados oficiais do BCB." />
+
+  <!-- PWA / Mobile -->
+  <meta name="theme-color" content="#0d1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dólar BR" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💵</text></svg>" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #30363d;
+      --green:   #3fb950;
+      --red:     #f85149;
+      --blue:    #58a6ff;
+      --yellow:  #d29922;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
+      --radius:  12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+      line-height: 1.5;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      animation: fadeDown .5s ease both;
+    }
+
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, #58a6ff 0%, #3fb950 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    header p { color: var(--muted); font-size: 0.88rem; margin-top: 0.4rem; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+      animation: fadeIn .6s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .8rem 1.2rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    .status-left { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+
+    .pulse-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 1.8s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .pulse-dot.err { background: var(--red); animation: none; }
+
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.85)} }
+
+    .badge {
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 2px 8px;
+      font-size: .72rem;
+      color: var(--blue);
+      white-space: nowrap;
+    }
+
+    .btn-refresh {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--blue);
+      padding: .32rem .9rem;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: .8rem;
+      transition: background .18s, border-color .18s;
+      white-space: nowrap;
+    }
+    .btn-refresh:hover    { background: #21262d; border-color: var(--blue); }
+    .btn-refresh:disabled { opacity: .5; cursor: not-allowed; }
+
+    .error-box {
+      display: none;
+      background: rgba(248,81,73,.1);
+      border: 1px solid var(--red);
+      border-radius: var(--radius);
+      padding: 1rem 1.4rem;
+      color: var(--red);
+      font-size: .88rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+      transition: transform .2s, border-color .25s, box-shadow .25s;
+      cursor: default;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(88,166,255,.4);
+      box-shadow: 0 8px 24px rgba(88,166,255,.08);
+    }
+
+    .card .lbl {
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .card .val {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--blue);
+      transition: color .4s;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card .sub { font-size: .85rem; font-weight: 600; }
+
+    .up      { color: var(--green) !important; }
+    .down    { color: var(--red)   !important; }
+    .neutral { color: var(--muted) !important; }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .chart-head h2 { font-size: .95rem; font-weight: 600; }
+
+    .period-group { display: flex; gap: .35rem; }
+
+    .btn-period {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: .24rem .7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .75rem;
+      transition: all .18s;
+    }
+    .btn-period:hover,
+    .btn-period.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .table-card h2 { font-size: .95rem; font-weight: 600; margin-bottom: 1rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+
+    th, td {
+      text-align: left;
+      padding: .62rem .9rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    th { color: var(--muted); font-weight: 500; font-size: .72rem; text-transform: uppercase; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+
+    footer {
+      margin-top: 2.5rem;
+      color: var(--muted);
+      font-size: .75rem;
+      text-align: center;
+      line-height: 1.8;
+    }
+    footer a { color: var(--blue); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    .skeleton {
+      background: linear-gradient(90deg,#21262d 25%,#30363d 50%,#21262d 75%);
+      background-size: 300% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+      height: 1.4rem;
+    }
+    @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+
+    .spinner {
+      display: inline-block;
+      width: 13px; height: 13px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 480px) {
+      .status-bar { flex-direction: column; align-items: flex-start; }
+      .card .val  { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>💵 Cotação Dólar × Real</h1>
+  <p>USD/BRL em tempo real &mdash; atualização automática a cada 1 hora</p>
+</header>
+
+<div class="container">
+
+  <div class="error-box" id="errorBox">
+    ⚠️ <strong>Não foi possível carregar a cotação.</strong>
+    Verifique sua conexão com a internet e tente novamente.
+    <br><small>Todas as 3 APIs foram consultadas sem sucesso.</small>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-left">
+      <span class="pulse-dot" id="pulseDot"></span>
+      <span>
+        Atualizado às <strong id="lastUpdate">—</strong>
+        <span id="spinner" class="spinner hidden"></span>
+      </span>
+      <span class="badge" id="apiSource" title="Fonte de dados ativa">—</span>
+    </div>
+    <span>Próxima atualização em <strong id="countdown">—</strong></span>
+    <button class="btn-refresh" id="btnRefresh" onclick="fetchAll()">⟳ Atualizar agora</button>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <span class="lbl">💰 Venda &mdash; USD → BRL</span>
+      <span class="val" id="cardAsk">—</span>
+      <span class="sub neutral" id="cardChange">Aguardando dados…</span>
+    </div>
+    <div class="card">
+      <span class="lbl">🏦 Compra &mdash; BRL → USD</span>
+      <span class="val" id="cardBid" style="font-size:1.55rem">—</span>
+      <span class="sub neutral">Dólar comercial</span>
+    </div>
+    <div class="card">
+      <span class="lbl">📊 Variação 24h</span>
+      <span class="val" id="cardPct" style="font-size:1.55rem">—</span>
+      <span class="sub neutral">em relação ao dia anterior</span>
+    </div>
+    <div class="card">
+      <span class="lbl">📅 Máxima / Mínima hoje</span>
+      <span class="val" id="cardMaxMin" style="font-size:1.2rem;line-height:1.5">—</span>
+      <span class="sub neutral">intervalo diário</span>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-head">
+      <h2>📈 Histórico de Cotação — USD/BRL</h2>
+      <div class="period-group">
+        <button class="btn-period active" onclick="setPeriod(7, this)">7d</button>
+        <button class="btn-period"        onclick="setPeriod(15,this)">15d</button>
+        <button class="btn-period"        onclick="setPeriod(30,this)">30d</button>
+      </div>
+    </div>
+    <canvas id="chart" height="88" role="img" aria-label="Gráfico histórico da cotação USD/BRL"></canvas>
+  </div>
+
+  <div class="table-card">
+    <h2>📋 Histórico Recente</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Venda (R$)</th>
+          <th>Compra (R$)</th>
+          <th>Variação</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr>
+          <td colspan="4">
+            <div class="skeleton" style="width:100%;height:1.1rem"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  <p>
+    Fontes: &nbsp;
+    <a href="https://www.bcb.gov.br/estabilidadefinanceira/fechamentodolar" target="_blank" rel="noopener">BCB — Banco Central do Brasil (PTAX)</a> &nbsp;|&nbsp;
+    <a href="https://frankfurter.dev" target="_blank" rel="noopener">Frankfurter</a> &nbsp;|&nbsp;
+    <a href="https://docs.awesomeapi.com.br" target="_blank" rel="noopener">AwesomeAPI</a>
+  </p>
+  <p style="margin-top:.4rem">
+    ⚠️ Dados meramente informativos — sem fins financeiros ou de investimento.
+  </p>
+  <p style="margin-top:.4rem; font-size:.7rem">
+    Código-fonte disponível no
+    <a href="https://github.com/SEU-USUARIO/dolar-real" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+<script>
+'use strict';
+
+const UPDATE_INTERVAL = 60 * 60 * 1000;
+
+let chartInstance  = null;
+let countdownTimer = null;
+let nextUpdate     = null;
+let currentPeriod  = 7;
+let prevAsk        = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAll();
+  setInterval(fetchAll, UPDATE_INTERVAL);
+});
+
+const f4 = n => Number(n).toLocaleString('pt-BR', {minimumFractionDigits:4, maximumFractionDigits:4});
+const f2 = n => Number(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+function fmtDate(ts) {
+  const ms = String(ts).length <= 10 ? ts * 1000 : Number(ts);
+  return new Date(ms).toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo'});
+}
+
+function fmtDay(ts) {
+  const ms = String(ts).length <= 10 ? ts * 1000 : Number(ts);
+  return new Date(ms).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', timeZone:'America/Sao_Paulo'});
+}
+
+function prevWorkday(date) {
+  const d = new Date(date);
+  do { d.setDate(d.getDate() - 1); }
+  while (d.getDay() === 0 || d.getDay() === 6);
+  return d;
+}
+
+function dateToPtax(d) {
+  const mm   = String(d.getMonth() + 1).padStart(2,'0');
+  const dd   = String(d.getDate()).padStart(2,'0');
+  const yyyy = d.getFullYear();
+  return `${mm}-${dd}-${yyyy}`;
+}
+
+async function fetchBCB() {
+  let d = new Date();
+  let data = null;
+  for (let i = 0; i < 5; i++) {
+    if (d.getDay() === 0 || d.getDay() === 6) { d = prevWorkday(d); continue; }
+    const ptaxDate = dateToPtax(d);
+    const url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@d)?@d='${ptaxDate}'&$format=json&$select=cotacaoCompra,cotacaoVenda,dataHoraCotacao`;
+    const r = await fetch(url, {cache:'no-store'});
+    if (!r.ok) throw new Error('BCB HTTP ' + r.status);
+    const j = await r.json();
+    if (j.value && j.value.length > 0) { data = j.value[j.value.length - 1]; break; }
+    d = prevWorkday(d);
+  }
+  if (!data) throw new Error('BCB sem dados');
+
+  const ask = data.cotacaoVenda;
+  const bid = data.cotacaoCompra;
+
+  const end   = new Date();
+  const start = new Date(); start.setDate(end.getDate() - currentPeriod - 5);
+  const urlH  = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@i,dataFinalCotacao=@f)?@i='${dateToPtax(start)}'&@f='${dateToPtax(end)}'&$format=json&$select=cotacaoCompra,cotacaoVenda,dataHoraCotacao&$orderby=dataHoraCotacao`;
+  const rH    = await fetch(urlH, {cache:'no-store'});
+  if (!rH.ok) throw new Error('BCB histórico HTTP ' + rH.status);
+  const jH    = await rH.json();
+
+  const byDay = {};
+  for (const item of jH.value) {
+    const day = item.dataHoraCotacao.slice(0,10);
+    byDay[day] = item;
+  }
+
+  const hist = Object.entries(byDay)
+    .sort(([a],[b]) => a.localeCompare(b))
+    .slice(-currentPeriod)
+    .map(([day, item], idx, arr) => {
+      const pct = idx > 0
+        ? ((item.cotacaoVenda - arr[idx-1][1].cotacaoVenda) / arr[idx-1][1].cotacaoVenda) * 100
+        : 0;
+      return { ts: Math.floor(new Date(day+'T12:00:00').getTime()/1000), ask: item.cotacaoVenda, bid: item.cotacaoCompra, pct };
+    });
+
+  let pct = 0;
+  if (hist.length >= 2)
+    pct = ((ask - hist[hist.length-2].ask) / hist[hist.length-2].ask) * 100;
+
+  return { source:'🏦 BCB — PTAX Oficial', ask, bid, high: ask*1.001, low: bid*0.999, pct, history: hist };
+}
+
+async function fetchFrankfurter() {
+  const rC  = await fetch('https://api.frankfurter.dev/v2/rates?base=USD&quotes=BRL', {cache:'no-store'});
+  if (!rC.ok) throw new Error('Frankfurter /rates ' + rC.status);
+  const jC  = await rC.json();
+  const ask = jC.rates.BRL;
+
+  const end   = new Date();
+  const start = new Date(); start.setDate(end.getDate() - currentPeriod - 2);
+  const url   = `https://api.frankfurter.dev/v2/rates?from=${start.toISOString().slice(0,10)}&quotes=BRL&base=USD`;
+  const rH    = await fetch(url, {cache:'no-store'});
+  if (!rH.ok) throw new Error('Frankfurter /hist ' + rH.status);
+  const jH    = await rH.json();
+
+  const days = Object.entries(jH.rates || {})
+    .sort(([a],[b]) => a.localeCompare(b))
+    .slice(-currentPeriod);
+
+  const hist = days.map(([date, rates], i, arr) => {
+    const v   = rates.BRL;
+    const pct = i > 0 ? ((v - arr[i-1][1].BRL) / arr[i-1][1].BRL) * 100 : 0;
+    return { ts: Math.floor(new Date(date+'T12:00:00').getTime()/1000), ask: v, bid: v*0.9985, pct };
+  });
+
+  let pct = 0;
+  if (hist.length >= 2) pct = ((ask - hist[hist.length-2].ask) / hist[hist.length-2].ask) * 100;
+
+  return { source:'🇪🇺 Frankfurter (ECB)', ask, bid: ask*0.9985, high: ask*1.002, low: ask*0.998, pct, history: hist };
+}
+
+async function fetchAwesome() {
+  const r  = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL', {cache:'no-store'});
+  if (!r.ok) throw new Error('Awesome HTTP ' + r.status);
+  const j  = await r.json();
+  const d  = j.USDBRL;
+
+  const rH = await fetch(`https://economia.awesomeapi.com.br/json/daily/USD-BRL/${currentPeriod}`, {cache:'no-store'});
+  if (!rH.ok) throw new Error('Awesome /daily HTTP ' + rH.status);
+  const jH = await rH.json();
+
+  const hist = [...jH].reverse().map(h => ({
+    ts:  parseInt(h.timestamp),
+    ask: parseFloat(h.ask),
+    bid: parseFloat(h.bid),
+    pct: parseFloat(h.pctChange || 0)
+  }));
+
+  return {
+    source: '🇧🇷 AwesomeAPI',
+    ask: parseFloat(d.ask), bid: parseFloat(d.bid),
+    high: parseFloat(d.high), low: parseFloat(d.low),
+    pct: parseFloat(d.pctChange), history: hist
+  };
+}
+
+async function fetchAll() {
+  const btn    = document.getElementById('btnRefresh');
+  const spinner= document.getElementById('spinner');
+  const errBox = document.getElementById('errorBox');
+  const pulse  = document.getElementById('pulseDot');
+
+  btn.disabled = true;
+  spinner.classList.remove('hidden');
+  errBox.style.display = 'none';
+
+  let result = null;
+  const apis = [
+    { name:'BCB PTAX',    fn: fetchBCB        },
+    { name:'Frankfurter', fn: fetchFrankfurter },
+    { name:'AwesomeAPI',  fn: fetchAwesome     },
+  ];
+
+  for (const api of apis) {
+    try {
+      result = await api.fn();
+      console.info(`✅ [${api.name}] OK`);
+      break;
+    } catch(e) {
+      console.warn(`⚠️ [${api.name}] falhou: ${e.message}`);
+    }
+  }
+
+  spinner.classList.add('hidden');
+  btn.disabled = false;
+
+  if (!result) {
+    pulse.classList.add('err');
+    errBox.style.display = 'block';
+    document.getElementById('lastUpdate').textContent = 'Erro ao carregar';
+    document.getElementById('apiSource').textContent  = 'Sem conexão';
+    return;
+  }
+
+  pulse.classList.remove('err');
+  renderCards(result);
+  renderChart(result.history);
+  renderTable(result.history);
+
+  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
+  document.getElementById('apiSource').textContent  = result.source;
+  nextUpdate = Date.now() + UPDATE_INTERVAL;
+  startCountdown();
+}
+
+function renderCards(data) {
+  const { ask, bid, high, low, pct } = data;
+  const dir = pct > 0.015 ? 'up' : pct < -0.015 ? 'down' : 'neutral';
+
+  const askEl = document.getElementById('cardAsk');
+  if (prevAsk !== null && Math.abs(ask - prevAsk) > 0.001) {
+    askEl.style.transition = 'none';
+    askEl.style.color = ask > prevAsk ? 'var(--green)' : 'var(--red)';
+    requestAnimationFrame(() => {
+      askEl.style.transition = 'color 2s';
+      askEl.style.color = 'var(--blue)';
+    });
+  }
+  prevAsk = ask;
+  askEl.textContent = 'R$ ' + f4(ask);
+
+  document.getElementById('cardBid').textContent = 'R$ ' + f4(bid);
+
+  const pctEl = document.getElementById('cardPct');
+  pctEl.textContent = (pct >= 0 ? '+' : '') + f2(pct) + '%';
+  pctEl.className   = 'val ' + dir;
+
+  const chgEl = document.getElementById('cardChange');
+  chgEl.textContent = dir === 'up'   ? `▲ Alta de ${f2(pct)}% nas últimas 24h`
+                    : dir === 'down' ? `▼ Baixa de ${f2(Math.abs(pct))}% nas últimas 24h`
+                    : '→ Estável nas últimas 24h';
+  chgEl.className = 'sub ' + dir;
+
+  document.getElementById('cardMaxMin').innerHTML =
+    `<span class="up">R$ ${f4(high)}</span><br><span class="down">R$ ${f4(low)}</span>`;
+}
+
+function renderChart(history) {
+  const labels = history.map(h => fmtDay(h.ts));
+  const values = history.map(h => h.ask);
+  const canvas = document.getElementById('chart');
+  const ctx    = canvas.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.clientHeight || 300);
+  grad.addColorStop(0, 'rgba(88,166,255,0.38)');
+  grad.addColorStop(1, 'rgba(88,166,255,0)');
+
+  if (chartInstance) {
+    chartInstance.data.labels = labels;
+    chartInstance.data.datasets[0].data = values;
+    chartInstance.data.datasets[0].backgroundColor = grad;
+    chartInstance.update('active');
+    return;
+  }
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'USD/BRL',
+        data: values,
+        borderColor: '#58a6ff',
+        backgroundColor: grad,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        pointBackgroundColor: '#0d1117',
+        pointBorderColor: '#58a6ff',
+        pointBorderWidth: 2,
+        fill: true,
+        tension: 0.38
+      }]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#161b22',
+          borderColor: '#30363d',
+          borderWidth: 1,
+          titleColor: '#8b949e',
+          bodyColor: '#e6edf3',
+          padding: 10,
+          callbacks: {
+            title: items => items[0].label,
+            label: ctx  => `  USD/BRL: R$ ${ctx.parsed.y.toFixed(4)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid:  { color: 'rgba(48,54,61,0.6)' },
+          ticks: { color: '#8b949e', maxTicksLimit: 10, maxRotation: 0 }
+        },
+        y: {
+          grid:  { color: 'rgba(48,54,61,0.6)' },
+          ticks: { color: '#8b949e', callback: v => 'R$ ' + v.toFixed(2) }
+        }
+      }
+    }
+  });
+}
+
+function renderTable(history) {
+  const rows = [...history].reverse().slice(0,14).map(h => {
+    const pct = h.pct || 0;
+    const cls = pct > 0.01 ? 'up' : pct < -0.01 ? 'down' : 'neutral';
+    const pctTxt = Math.abs(pct) > 0.01
+      ? `<span class="${cls}">${pct >= 0 ? '+' : ''}${f2(pct)}%</span>`
+      : '<span class="neutral">—</span>';
+    return `<tr>
+      <td>${fmtDate(h.ts)}</td>
+      <td>R$ ${f4(h.ask)}</td>
+      <td>R$ ${f4(h.bid)}</td>
+      <td>${pctTxt}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tableBody').innerHTML = rows ||
+    '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1rem">Sem dados disponíveis</td></tr>';
+}
+
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    const diff = nextUpdate - Date.now();
+    if (diff <= 0) { document.getElementById('countdown').textContent = 'Atualizando…'; return; }
+    const m = Math.floor(diff / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('countdown').textContent = `${m}min ${String(s).padStart(2,'0')}s`;
+  }, 1000);
+}
+
+function setPeriod(days, btn) {
+  currentPeriod = days;
+  document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  fetchAll();
+}
+</script>
+
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
